@@ -22,6 +22,7 @@ def run_fastqc(forward_reads,reverse_reads,outdir):
     Result:
      FastQC quality reports.
     """
+    os.mkdir(outdir)
     subprocess.run(["fastqc",forward_reads,reverse_reads,"-o",outdir])
 
 def run_spades(forward_reads,reverse_reads):
