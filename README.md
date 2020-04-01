@@ -1,3 +1,4 @@
 # bioinformatics-class
 Projects created in my bioinformatics class. 
-This repository is the root to my other bioinformatic projects.
+
+ - Zeus: command line program that runs other programs to assemble and annotate a bacterial genome.
