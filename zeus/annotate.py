@@ -6,11 +6,11 @@ import os
 
 
 ZEUS_DIR = os.path.dirname(os.path.realpath(__file__))
-NEW_DB = ZEUS_DIR+'/db/'
-REFSEQ_DB = ZEUS_DIR+'/db/refdb/bacteria'
 PRODIGAL_PROTEINS = 'predicted_proteins.faa'
 PRODIGAL_GENES = 'predicted_genes.txt'
 
+#Directory to hold blast database
+NEW_DB = ZEUS_DIR+'/db/'
 
 def run_prodigal(genome,outdir):
     '''Run prodigal for gene prediction and protein translations.
@@ -67,18 +67,15 @@ def run_blastp(query,dbname,outdir):
     print("Done")
 
 
-def annotate_proteins(genome,outdir,dbname=None,dbseqs=None):
+def annotate_proteins(genome,outdir,dbname,dbseqs):
+
+    if not os.path.isdir(NEW_DB):
+        os.mkdir(NEW_DB)
 
     os.mkdir(outdir)
     run_prodigal(genome,outdir)
-
-    if dbseqs and dbname:
-        makeblastdb(dbname,dbseqs)
-        run_blastp(outdir+PRODIGAL_PROTEINS,NEW_DB+dbname,outdir)
-
-
-    else:
-        run_blastp(outdir+PRODIGAL_PROTEINS,REFSEQ_DB,outdir)
+    makeblastdb(dbname,dbseqs)
+    run_blastp(outdir+PRODIGAL_PROTEINS,NEW_DB+dbname,outdir)
 
 
 
