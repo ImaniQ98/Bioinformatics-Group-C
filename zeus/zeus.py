@@ -15,17 +15,11 @@ RESULTS_DIR = "zeus_ouput/"
 ANNOTATE_DIR = RESULTS_DIR+"annos/"
 
 def main():
-
         num_args = len(sys.argv[1:])
-
-        if num_args == 2:
-            forward_reads,reverse_reads = sys.argv[1:]
-            dbname = None
-            dbseqs = None
-        elif num_args == 4:
+        if num_args == 4:
             forward_reads,reverse_reads,dbname,dbseqs = sys.argv[1:]
         else:
-            print("useage: zeus.py [OPTIONAL] <forward_reads> <reverse_reads> [dbname] [dbseqs]")
+            print("useage: zeus.py <forward_reads> <reverse_reads> <dbname> <dbseqs>")
             exit()
 
         assemble.assemble_genome(
