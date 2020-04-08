@@ -79,14 +79,15 @@ def seq_lookup_table(fasta_file):
         lookup_table[record.id] = record.seq
     return lookup_table
 
-def go_through(record):
+def go_through(blast_record):
     '''
 
     '''
     prot_functions = []
     for alignment in blast_record.alignments:
         title = alignment.title
-        prot_function = title[title.find(" "):title.find('OS')]
+        index = title.find("sp") if "sp" in title else 0
+        prot_function = title[title.find(" ",index):title.find('OS')]
         prot_functions.append(prot_function)
     return prot_functions
 
@@ -102,8 +103,8 @@ def hits_from_blast_results(result_file):
             query = blast_record.query
             query = query[:query.find("#")].strip(" ")
             protein_functions = go_through(blast_record)
-        if protein_functions:
-            hits[query] = protein_functions[0]
+            if protein_functions:
+                hits[query] = protein_functions[0]
     return hits
 
 def label_proteins(predicted_proteins_file,blast_result_file,outfile):
