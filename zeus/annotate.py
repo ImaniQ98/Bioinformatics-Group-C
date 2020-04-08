@@ -4,6 +4,10 @@ The annotate.py module contains functions that call external programs blastp,mak
 import subprocess
 import os
 
+from Bio import SeqIO
+from Bio.SeqRecord import SeqRecord
+from Bio.Blast import NCBIXML
+
 
 ZEUS_DIR = os.path.dirname(os.path.realpath(__file__))
 PRODIGAL_PROTEINS = 'predicted_proteins.faa'
@@ -66,6 +70,61 @@ def run_blastp(query,dbname,outdir):
     subprocess.run(command)
     print("Done")
 
+def seq_lookup_table(fasta_file):
+    '''
+
+    '''
+    lookup_table = {}
+    for record in SeqIO.parse(fasta_file,"fasta"):
+        lookup_table[record.id] = record.seq
+    return lookup_table
+
+def go_through(record):
+    '''
+
+    '''
+    prot_functions = []
+    for alignment in blast_record.alignments:
+        title = alignment.title
+        prot_function = title[title.find(" "):title.find('OS')]
+        prot_functions.append(prot_function)
+    return prot_functions
+
+def hits_from_blast_results(result_file):
+    '''
+
+    '''
+    with open(result_file) as blast_file:
+        blast_records = NCBIXML.parse(blast_file)
+
+        hits = {}
+        for blast_record in blast_records:
+            query = blast_record.query
+            query = query[:query.find("#")].strip(" ")
+            protein_functions = go_through(blast_record)
+        if protein_functions:
+            hits[query] = protein_functions[0]
+    return hits
+
+def label_proteins(predicted_proteins_file,blast_result_file,outfile):
+    lookup_table = seq_lookup_table(predicted_proteins_file)
+    hits = hits_from_blast_results(blast_result_file)
+
+    annotations = []
+    for i,item in enumerate(hits.items()):
+        fasta_id,predicted_function = item
+        seq = lookup_table[fasta_id]
+        new_record = SeqRecord(
+            id="zeus{}".format(i),
+            description="zeus{} {}".format(i,predicted_function),
+            seq=seq
+        )
+        annotations.append(new_record)
+    SeqIO.write(annotations,outfile,"fasta")
+
+
+
+
 
 def annotate_proteins(genome,outdir,dbname,dbseqs):
 
@@ -76,6 +135,10 @@ def annotate_proteins(genome,outdir,dbname,dbseqs):
     run_prodigal(genome,outdir)
     makeblastdb(dbname,dbseqs)
     run_blastp(outdir+PRODIGAL_PROTEINS,NEW_DB+dbname,outdir)
+    label_proteins(outdir+PRODIGAL_PROTEINS,
+                   outdir+"blast_results.xml",
+                   outdir+"zeus_annotations.faa"
+                   )
 
 
 
